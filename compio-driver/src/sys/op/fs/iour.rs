@@ -19,6 +19,9 @@ unsafe impl<S: AsFd> OpCode for OpenFile<S> {
     }
 
     unsafe fn set_result(&mut self, _: &mut Self::Control, res: &io::Result<usize>, _: &Extra) {
+        if self.opened_fd.is_some() {
+            return;
+        }
         if let Ok(fd) = res {
             // SAFETY: fd is a valid fd returned from kernel
             let fd = unsafe { OwnedFd::from_raw_fd(*fd as _) };

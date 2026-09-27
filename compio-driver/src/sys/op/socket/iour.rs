@@ -22,6 +22,9 @@ unsafe impl OpCode for CreateSocket {
     }
 
     unsafe fn set_result(&mut self, _: &mut Self::Control, res: &io::Result<usize>, _: &Extra) {
+        if self.opened_fd.is_some() {
+            return;
+        }
         if let Ok(fd) = res {
             // SAFETY: fd is a valid fd returned from kernel
             let fd = unsafe { Socket2::from_raw_fd(*fd as _) };
@@ -106,6 +109,9 @@ unsafe impl<S: AsFd> OpCode for Accept<S> {
     }
 
     unsafe fn set_result(&mut self, _: &mut Self::Control, res: &io::Result<usize>, _: &Extra) {
+        if self.accepted_fd.is_some() {
+            return;
+        }
         if let Ok(fd) = res {
             // SAFETY: fd is a valid fd returned from kernel
             let fd = unsafe { Socket2::from_raw_fd(*fd as _) };
